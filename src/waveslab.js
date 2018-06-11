@@ -162,3 +162,78 @@ function Waveform(container,
     requestAnimationFrame(() => {this.render();});
   }
 } //end Waveform
+
+//============================================================
+//FrequencyChart: uses analyser node to create bar chart of current playing audio
+//=============================================================
+function FrequencyChart(container,
+  barSize = 5, spacing = 1, amplitude= 0.25, cursorSize = 2,
+  mainColor = "#ffffff", progressionColor = "#869aba", cursorColor = "#ffffff"
+  ){
+
+  //get container
+  var container = document.getElementById(container);
+
+  //setup canvas. Keeping accessible for user manipulation
+  this.canvas = document.createElement('canvas');
+  this.canvas.width = container.offsetWidth;
+  this.canvas.height = container.offsetHeight;
+  var canvasCtx = this.canvas.getContext("2d");
+  container.appendChild(this.canvas);
+
+  const WIDTH = this.canvas.width;
+  const HEIGHT = this.canvas.height;
+
+  //audio element
+  var audio = new Audio();
+
+  //audio context
+  var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  var analyser = audioCtx.createAnalyser();
+
+  var source, bufferLength, dataArray;
+
+  this.generate = function(url){
+    audio.src = url;
+    audio.controls = true;
+    document.body.appendChild(audio);
+
+    //audio source
+    source = audioCtx.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    analyser.fftSize = 512;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+    this.render();
+  }
+
+  this.draw = function(){
+    analyser.getByteFrequencyData(dataArray);
+
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    var barWidth = (WIDTH / bufferLength) * 2;
+    var barHeight;
+    var x = 0;
+
+    for(var i = 0; i < bufferLength; i++) {
+      barHeight = dataArray[i];
+
+      canvasCtx.fillStyle = 'rgb(50,'+ (x) +',' + (barHeight + 100) +')';
+      canvasCtx.fillRect(x,HEIGHT/2-barHeight/3,barWidth,barHeight/3);
+
+      canvasCtx.fillStyle = 'rgba(50,'+ (x) +',' + (barHeight + 100) + ', 0.3)';
+      canvasCtx.fillRect(x, HEIGHT/2, barWidth, barHeight/5);
+
+      x += barWidth + 5;
+    }
+  }
+
+  this.render = function(){
+    this.draw();
+    requestAnimationFrame(() => {this.render();});
+  }
+
+}
