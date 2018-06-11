@@ -6,10 +6,10 @@
 //============================================================
 //Waveform:
 //=============================================================
-function Waveform(container,
+function Waveform({container,
   barSize = 5, spacing = 1, amplitude= 0.25, cursorSize = 2,
   mainColor = "#ffffff", progressionColor = "#869aba", cursorColor = "#ffffff"
-  ){
+  }){
 
   //get container
   var container = document.getElementById(container);
@@ -166,10 +166,10 @@ function Waveform(container,
 //============================================================
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
 //=============================================================
-function FrequencyChart(container,
-  barSize = 5, spacing = 1, amplitude= 0.25, cursorSize = 2,
-  mainColor = "#ffffff", progressionColor = "#869aba", cursorColor = "#ffffff"
-  ){
+function FrequencyChart({container,
+  barSize = 5, amplitude= 0.25, fftSize = 8, spacing = 2,
+  mainColor = "#ffffff", endColor = "#869aba", heightColor = "#ffffff"
+  }){
 
   //get container
   var container = document.getElementById(container);
@@ -191,8 +191,13 @@ function FrequencyChart(container,
   var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   var analyser = audioCtx.createAnalyser();
 
-  var source, bufferLength, dataArray;
+  var fftSize = Math.pow(2,fftSize);
 
+  var source, bufferLength, dataArray, barWidth, barHeight;
+
+  //---------------------------------------------------------
+  //generate(): generates frequency chart
+  //---------------------------------------------------------
   this.generate = function(url){
     audio.src = url;
     audio.controls = true;
@@ -203,34 +208,41 @@ function FrequencyChart(container,
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
 
-    analyser.fftSize = 512;
+    analyser.fftSize = fftSize;
     bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
     this.render();
   }
 
+  //---------------------------------------------------------
+  //draw():
+  //---------------------------------------------------------
   this.draw = function(){
     analyser.getByteFrequencyData(dataArray);
 
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    var barWidth = (WIDTH / bufferLength) * 2;
-    var barHeight;
+    barWidth = (WIDTH / bufferLength);
+    barHeight;
     var x = 0;
 
     for(var i = 0; i < bufferLength; i++) {
       barHeight = dataArray[i];
 
+      //draw top bars
       canvasCtx.fillStyle = 'rgb(50,'+ (x) +',' + (barHeight + 100) +')';
       canvasCtx.fillRect(x,HEIGHT/2-barHeight/3,barWidth,barHeight/3);
 
+      //reflection bars
       canvasCtx.fillStyle = 'rgba(50,'+ (x) +',' + (barHeight + 100) + ', 0.3)';
       canvasCtx.fillRect(x, HEIGHT/2, barWidth, barHeight/5);
 
-      x += barWidth + 5;
+      x += barWidth + spacing;
     }
   }
-
+  //---------------------------------------------------------
+  //render(): render loop drawing on canvas
+  //---------------------------------------------------------
   this.render = function(){
     this.draw();
     requestAnimationFrame(() => {this.render();});
