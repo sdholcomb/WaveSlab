@@ -167,7 +167,7 @@ function Waveform({container,
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
 //=============================================================
 function FrequencyChart({container,
-  barSize = 5, amplitude= 0.25, fftSize = 8, spacing = 2,
+  barSize = 5, amplitude= 0.33, fftSize = 8, spacing = 2,
   mainColor = "#ffffff", endColor = "#869aba", heightColor = "#ffffff"
   }){
 
@@ -211,6 +211,7 @@ function FrequencyChart({container,
     analyser.fftSize = fftSize;
     bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
+    barWidth = (WIDTH / bufferLength);
     this.render();
   }
 
@@ -220,18 +221,16 @@ function FrequencyChart({container,
   this.draw = function(){
     analyser.getByteFrequencyData(dataArray);
 
+    //clear canvas
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    barWidth = (WIDTH / bufferLength);
-    barHeight;
     var x = 0;
-
     for(var i = 0; i < bufferLength; i++) {
       barHeight = dataArray[i];
 
       //draw top bars
       canvasCtx.fillStyle = 'rgb(50,'+ (x) +',' + (barHeight + 100) +')';
-      canvasCtx.fillRect(x,HEIGHT/2-barHeight/3,barWidth,barHeight/3);
+      canvasCtx.fillRect(x,HEIGHT/2-barHeight * amplitude,barWidth,barHeight * amplitude);
 
       //reflection bars
       canvasCtx.fillStyle = 'rgba(50,'+ (x) +',' + (barHeight + 100) + ', 0.3)';
@@ -247,5 +246,4 @@ function FrequencyChart({container,
     this.draw();
     requestAnimationFrame(() => {this.render();});
   }
-
 }
