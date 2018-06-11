@@ -32,7 +32,7 @@
   <button type="button" onclick="wave.playPause()">play/pause</button>
 
   <script>
-    var wave = new Waveform(container="waveholder");
+    var wave = new Waveform({container: "waveholder", mainColor: "#ffffff"});
     wave.genWaveform("../assets/audios/betterdays.mp3");
   </script>
 </body>

@@ -17,7 +17,7 @@ Audio Waveform Generation using Web Audio and Canvas
 
 
 ```javascript
-var wave = new Waveform(container="waveholder");
+var wave = new Waveform({container:"waveholder", mainColor: "#ffffff");
 wave.genWaveform("myaudio.mp3");
 ```
 
