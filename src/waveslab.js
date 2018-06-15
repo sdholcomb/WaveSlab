@@ -168,7 +168,7 @@ function Waveform({container,
 //=============================================================
 function FrequencyChart({container,
                         barSize = 5, amplitude= 0.33, fftSize = 8, spacing = 2,
-                        mainColor = "#42cef4"}){
+                        mainColor = "#42cef4", bottomColor}){
 
   //get container
   var container = document.getElementById(container);
@@ -194,6 +194,10 @@ function FrequencyChart({container,
 
   var source, bufferLength, dataArray, barWidth, barHeight;
   var mainColor = mainColor;
+
+  if (typeof bottomColor == 'undefined')
+    bottomColor = mainColor;
+
   //---------------------------------------------------------
   //generate(): generates frequency chart
   //---------------------------------------------------------
@@ -245,8 +249,8 @@ function FrequencyChart({container,
     ctx.fillRect(currentX, ctxHeight/2-barHeight * amplitude,barWidth,barHeight * amplitude);
 
     //bottom bar
-    ctx.fillStyle = mainColor + "4D";
-    ctx.fillRect(currentX, ctxHeight/2, barWidth, barHeight/5);
+    ctx.fillStyle = bottomColor;
+    ctx.fillRect(currentX, Math.floor(ctxHeight/2), barWidth, barHeight/2);
   }
   //---------------------------------------------------------
   //render(): render loop drawing on canvas
