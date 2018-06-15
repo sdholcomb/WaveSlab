@@ -23,8 +23,11 @@
   <div id="holder"></div>
 
   <script>
-    var wave = new FrequencyChart({container: "holder"});
+    var fc = new FrequencyChart({
+      container: "holder",
+      mainColor: "#e014a6",
+    });
 
-    wave.generate("../assets/audios/slowmotion.mp3");
+    fc.generate("../assets/audios/slowmotion.mp3");
   </script>
 </body>

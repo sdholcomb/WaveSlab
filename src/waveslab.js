@@ -6,10 +6,11 @@
 //============================================================
 //Waveform:
 //=============================================================
-function Waveform({container,
+function Waveform({
+  container,
   barSize = 5, spacing = 1, amplitude= 0.25, cursorSize = 2,
   mainColor = "#ffffff", progressionColor = "#869aba", cursorColor = "#ffffff"
-  }){
+}){
 
   //get container
   var container = document.getElementById(container);
@@ -166,9 +167,12 @@ function Waveform({container,
 //============================================================
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
 //=============================================================
-function FrequencyChart({container,
-                        barSize = 5, amplitude= 0.33, fftSize = 8, spacing = 2,
-                        mainColor = "#42cef4", bottomColor}){
+function FrequencyChart({
+  container,
+  barSize = 5, amplitude= 0.33, fftSize = 8, spacing = 2,
+  bottomAmplitude = amplitude,
+  mainColor = "#42cef4", bottomColor = mainColor
+}){
 
   //get container
   var container = document.getElementById(container);
@@ -194,9 +198,6 @@ function FrequencyChart({container,
 
   var source, bufferLength, dataArray, barWidth, barHeight;
   var mainColor = mainColor;
-
-  if (typeof bottomColor == 'undefined')
-    bottomColor = mainColor;
 
   //---------------------------------------------------------
   //generate(): generates frequency chart
@@ -250,7 +251,7 @@ function FrequencyChart({container,
 
     //bottom bar
     ctx.fillStyle = bottomColor;
-    ctx.fillRect(currentX, Math.floor(ctxHeight/2), barWidth, barHeight/2);
+    ctx.fillRect(currentX, Math.floor(ctxHeight/2), barWidth, barHeight * bottomAmplitude);
   }
   //---------------------------------------------------------
   //render(): render loop drawing on canvas
