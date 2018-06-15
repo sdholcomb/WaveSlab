@@ -167,9 +167,8 @@ function Waveform({container,
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
 //=============================================================
 function FrequencyChart({container,
-  barSize = 5, amplitude= 0.33, fftSize = 8, spacing = 2,
-  mainColor = "#ffffff", endColor = "#869aba", heightColor = "#ffffff"
-  }){
+                        barSize = 5, amplitude= 0.33, fftSize = 8, spacing = 2,
+                        mainColor = "#42cef4"}){
 
   //get container
   var container = document.getElementById(container);
@@ -194,7 +193,7 @@ function FrequencyChart({container,
   var fftSize = Math.pow(2,fftSize);
 
   var source, bufferLength, dataArray, barWidth, barHeight;
-
+  var mainColor = mainColor;
   //---------------------------------------------------------
   //generate(): generates frequency chart
   //---------------------------------------------------------
@@ -226,18 +225,28 @@ function FrequencyChart({container,
 
     var x = 0;
     for(var i = 0; i < bufferLength; i++) {
+      //get barHeight data
       barHeight = dataArray[i];
 
-      //draw top bars
-      canvasCtx.fillStyle = 'rgb(50,'+ (x) +',' + (barHeight + 100) +')';
-      canvasCtx.fillRect(x,HEIGHT/2-barHeight * amplitude,barWidth,barHeight * amplitude);
-
-      //reflection bars
-      canvasCtx.fillStyle = 'rgba(50,'+ (x) +',' + (barHeight + 100) + ', 0.3)';
-      canvasCtx.fillRect(x, HEIGHT/2, barWidth, barHeight/5);
+      //draw bars using canvas
+      this.drawBars(x, barWidth, barHeight, amplitude, canvasCtx, HEIGHT);
 
       x += barWidth + spacing;
     }
+  }
+  //---------------------------------------------------------
+  //setBarStyle(): Used inside the draw function. It is made available
+  //               through the object so it can be overriden with custom styles
+  //               without having to override the whole draw function
+  //---------------------------------------------------------
+  this.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight){
+    //top bar
+    ctx.fillStyle = mainColor;
+    ctx.fillRect(currentX, ctxHeight/2-barHeight * amplitude,barWidth,barHeight * amplitude);
+
+    //bottom bar
+    ctx.fillStyle = mainColor + "4D";
+    ctx.fillRect(currentX, ctxHeight/2, barWidth, barHeight/5);
   }
   //---------------------------------------------------------
   //render(): render loop drawing on canvas
