@@ -11,6 +11,17 @@
       height: 75%;
     }
 
+    #load{
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+
     p{
       color: white;
     }
@@ -20,11 +31,13 @@
 </head>
 <body>
   <p>Audio provided by bensound: https://www.bensound.com/<p>
-  <div id="holder"></div>
+  <div>
+    <div id="holder"></div>
+    <button type="button" onclick="wave.playPause()">play/pause</button>
+  </div>
 
   <script>
     var wave = new FrequencyChart({container: "holder"});
-
 
     //overriding setBarStyle for advanced users
     wave.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight){
@@ -36,7 +49,6 @@
       ctx.fillStyle = 'rgba(50,'+ (currentX) +',' + (barHeight + 100) + ', 0.3)';
       ctx.fillRect(currentX, ctxHeight/2, barWidth, barHeight/5);
     }
-
     wave.generate("../assets/audios/slowmotion.mp3");
   </script>
 </body>
