@@ -17,26 +17,28 @@ function Waveform({
   cursorColor = "#ffffff"
 }) {
 
-  //get container
+  // Canvas setup.
   var container = document.getElementById(container);
-
-  //setup canvas. Keeping accessible for user manipulation
   this.canvas = document.createElement('canvas');
   this.canvas.width = container.offsetWidth;
   this.canvas.height = container.offsetHeight;
   var canvasCtx = this.canvas.getContext("2d");
   container.appendChild(this.canvas);
-  this.canvas.addEventListener("mousedown", handleWaveClick.bind(this));
-
   const WIDTH = this.canvas.width;
   const HEIGHT = this.canvas.height;
 
-  //setup audio context
+  // Event handlers.
+  var mouseDown = false;
+  this.canvas.addEventListener("mousemove", handleMouseMove.bind(this));
+  this.canvas.addEventListener("mousedown", handleMouseDown.bind(this));
+  this.canvas.addEventListener("mouseup", handleMouseUp.bind(this));
+
+  // Setup audio components.
   var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
   var source;
   var waveData = [];
 
-  //capture arguments
+  // Process arguments.
   var barSize = barSize;
   var spacing = barSize + spacing;
   var amplitude = HEIGHT * amplitude;
@@ -45,39 +47,21 @@ function Waveform({
   var cursorColor = cursorColor;
   var cursorSize = cursorSize;
 
-  //timing variables
+  // Timing variables
   var playing = false;
   var playbackTime = 0;
   var pastTime = 0;
 
   //---------------------------------------------------------
-  //genWaveform(): Loads audio and launches animation
-  //               once audio is ready
+  //generate(): Loads audio and launches animation
+  //            once audio is ready
   //---------------------------------------------------------
-  this.genWaveform = function(url) {
+  this.generate = function(url) {
     document.addEventListener('audioReady', () => {
       this.processChannelData();
       this.render();
     }, false);
     this.loadAudio(url);
-  }
-
-  //---------------------------------------------------------
-  //playPause(): alternates between playing and pausing playback
-  //---------------------------------------------------------
-  this.playPause = function() {
-    if (!playing) {
-      source = audioCtx.createBufferSource();
-      source.buffer = this.audBuffer;
-      source.connect(audioCtx.destination);
-      source.start(audioCtx.currentTime, playbackTime);
-      pastTime = audioCtx.currentTime;
-      playing = true;
-    }
-    else {
-      source.stop();
-      playing = false;
-    }
   }
 
   //---------------------------------------------------------
@@ -90,7 +74,7 @@ function Waveform({
       waveData[i] = val;
     }
   }
-  //---------------------------------------------------------
+
   //---------------------------------------------------------
   //loadAudio(): loads the audio and stores results
   //---------------------------------------------------------
@@ -116,6 +100,96 @@ function Waveform({
   }
 
   //---------------------------------------------------------
+  //playPause(): alternates between playing and pausing playback
+  //---------------------------------------------------------
+  this.playPause = function() {
+    if (!playing) {
+      source = audioCtx.createBufferSource();
+      source.buffer = this.audBuffer;
+      source.connect(audioCtx.destination);
+      source.start(audioCtx.currentTime, playbackTime);
+      pastTime = audioCtx.currentTime;
+      playing = true;
+    }
+    else {
+      source.stop();
+      playing = false;
+    }
+  }
+
+  //---------------------------------------------------------
+  //setPlaybackTime(seconds): Sets the time in seconds for the playback
+  //---------------------------------------------------------
+  this.setPlaybackTime = function(seconds) {
+    playbackTime = seconds;
+
+    if (playing) {
+      source.stop();
+      source = audioCtx.createBufferSource();
+      source.buffer = this.audBuffer;
+      source.connect(audioCtx.destination);
+      source.start(audioCtx.currentTime, playbackTime);
+      playing = true;
+    }
+  }
+
+  //---------------------------------------------------------
+  //syncTime(): Handles progression of playback during render
+  //---------------------------------------------------------
+  function syncTime() {
+    if (playing) {
+      playbackTime = playbackTime + audioCtx.currentTime - pastTime;
+      pastTime = audioCtx.currentTime;
+    }
+  }
+
+  //---------------------------------------------------------
+  //handleMouseMove():
+  //---------------------------------------------------------
+  function handleMouseMove() {
+    if (!mouseDown)
+      return;
+
+    var x = event.clientX - this.canvas.offsetLeft;
+    playbackTime = (x / WIDTH * this.duration);
+    pastTime = audioCtx.currentTime;
+  }
+
+  //---------------------------------------------------------
+  //handleMouseUp():
+  //---------------------------------------------------------
+  function handleMouseUp() {
+    mouseDown = false;
+    if (playing) {
+      source.stop();
+      source = audioCtx.createBufferSource();
+      source.buffer = this.audBuffer;
+      source.connect(audioCtx.destination);
+      source.start(audioCtx.currentTime, playbackTime);
+      playing = true;
+    }
+  }
+
+  //---------------------------------------------------------
+  //handleMouseDown():
+  //---------------------------------------------------------
+  function handleMouseDown() {
+    mouseDown = true;
+
+    var x = event.clientX - this.canvas.offsetLeft;
+    playbackTime = (x / WIDTH * this.duration);
+    pastTime = audioCtx.currentTime;
+    if (playing) {
+      source.stop();
+      source = audioCtx.createBufferSource();
+      source.buffer = this.audBuffer;
+      source.connect(audioCtx.destination);
+      source.start(audioCtx.currentTime, playbackTime);
+      playing = true;
+    }
+  }
+
+  //---------------------------------------------------------
   //draw(): draws this waveform
   //---------------------------------------------------------
   this.draw = function() {
@@ -134,32 +208,6 @@ function Waveform({
   }
 
   //---------------------------------------------------------
-  //setPlayback(): Handles progression of playback during render
-  //---------------------------------------------------------
-  function syncTime() {
-    if (playing) {
-      playbackTime = playbackTime + audioCtx.currentTime - pastTime;
-      pastTime = audioCtx.currentTime;
-    }
-  }
-  //---------------------------------------------------------
-  //handleWaveClick(): handles when waveform is clicked with mouse
-  //---------------------------------------------------------
-  function handleWaveClick() {
-    var x = event.clientX - this.canvas.offsetLeft;
-    playbackTime = (x / WIDTH * this.duration);
-    pastTime = audioCtx.currentTime;
-    if (playing) {
-      source.stop();
-      source = audioCtx.createBufferSource();
-      source.buffer = this.audBuffer;
-      source.connect(audioCtx.destination);
-      source.start(audioCtx.currentTime, playbackTime);
-
-      playing = true;
-    }
-  }
-  //---------------------------------------------------------
   //render(): render loop for animating and timing audio waveform
   //---------------------------------------------------------
   this.render = function() {
@@ -169,10 +217,10 @@ function Waveform({
       this.render();
     });
   }
-} //end Waveform
+}
 
 //==============================================================================
-//HtmlFrequencyChart: uses analyser node to create bar chart of current playing audio
+//HtmlFrequencyChart: Deprecated
 //==============================================================================
 function HtmlFrequencyChart({
   container,
