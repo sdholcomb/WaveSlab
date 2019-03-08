@@ -10,7 +10,7 @@ function Waveform({
   container,
   barSize = 5,
   spacing = 1,
-  amplitude = 0.25,
+  amplitude = 1,
   cursorSize = 2,
   mainColor = "#ffffff",
   progressionColor = "#869aba",
@@ -33,6 +33,8 @@ function Waveform({
 
   //setup audio context
   var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+  var source;
+  var waveData = [];
 
   //capture arguments
   var barSize = barSize;
@@ -47,7 +49,6 @@ function Waveform({
   var playing = false;
   var playbackTime = 0;
   var pastTime = 0;
-  var source;
 
   //---------------------------------------------------------
   //genWaveform(): Loads audio and launches animation
@@ -55,6 +56,7 @@ function Waveform({
   //---------------------------------------------------------
   this.genWaveform = function(url) {
     document.addEventListener('audioReady', () => {
+      this.processChannelData();
       this.render();
     }, false);
     this.loadAudio(url);
@@ -77,6 +79,18 @@ function Waveform({
       playing = false;
     }
   }
+
+  //---------------------------------------------------------
+  //processChannelData(): Stores the channel data into a canvas usable form
+  //---------------------------------------------------------
+  this.processChannelData = function() {
+    for (var i = 0; i < WIDTH; i += spacing) {
+      var loc = Math.floor(this.chanData.length / (WIDTH - spacing)) * i;
+      var val = this.chanData[loc];
+      waveData[i] = val;
+    }
+  }
+  //---------------------------------------------------------
   //---------------------------------------------------------
   //loadAudio(): loads the audio and stores results
   //---------------------------------------------------------
@@ -106,28 +120,14 @@ function Waveform({
   //---------------------------------------------------------
   this.draw = function() {
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-
     for (var i = 0; i < WIDTH; i += spacing) {
-      var min = 1.0;
-      var max = -1.0;
-      for (var j = 0; j < this.step; j++) {
-        var val = this.chanData[(i * this.step) + j];
-        if (val < min)
-          min = val;
-        if (val > max)
-          max = val;
-      }
 
       //set color based on progression
-      if (i / WIDTH * this.duration <= playbackTime)
-        canvasCtx.fillStyle = progressionColor;
-      else
-        canvasCtx.fillStyle = mainColor;
+      canvasCtx.fillStyle = (i / WIDTH * this.duration <= playbackTime) ? progressionColor : mainColor;
 
       //draw the data bar
-      canvasCtx.fillRect(i, HEIGHT / 2 + (min) * amplitude, barSize, Math.max(1, (max - min) * amplitude));
+      canvasCtx.fillRect(i, HEIGHT / 2 + (-1 * waveData[i] / 2) * amplitude, barSize, waveData[i] * amplitude);
     }
-
     //draw progression bar
     canvasCtx.fillStyle = cursorColor;
     canvasCtx.fillRect(playbackTime / this.duration * WIDTH, HEIGHT / 2 - amplitude, cursorSize, amplitude * 2);
@@ -163,7 +163,6 @@ function Waveform({
   //render(): render loop for animating and timing audio waveform
   //---------------------------------------------------------
   this.render = function() {
-
     this.draw();
     syncTime();
     requestAnimationFrame(() => {
