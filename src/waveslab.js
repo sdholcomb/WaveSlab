@@ -30,8 +30,13 @@ function Waveform({
   // Event handlers.
   var mouseDown = false;
   this.canvas.addEventListener("mousemove", handleMouseMove.bind(this));
+  this.canvas.addEventListener("touchmove", handleMouseMove.bind(this));
+
   this.canvas.addEventListener("mousedown", handleMouseDown.bind(this));
+  this.canvas.addEventListener("touchstart", handleMouseDown.bind(this));
+
   this.canvas.addEventListener("mouseup", handleMouseUp.bind(this));
+  this.canvas.addEventListener("touchend", handleMouseUp.bind(this));
 
   // Setup audio components.
   var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
