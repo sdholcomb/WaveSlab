@@ -24,14 +24,15 @@ function Waveform({
   this.canvas.height = container.offsetHeight;
   var canvasCtx = this.canvas.getContext("2d");
   container.appendChild(this.canvas);
-  const WIDTH = this.canvas.width;
-  const HEIGHT = this.canvas.height;
+  var WIDTH = this.canvas.width;
+  var HEIGHT = this.canvas.height;
 
   // Event handlers.
   var mouseDown = false;
   this.canvas.addEventListener("mousemove", handleMouseMove.bind(this));
   this.canvas.addEventListener("mousedown", handleMouseDown.bind(this));
   this.canvas.addEventListener("mouseup", handleMouseUp.bind(this));
+  window.addEventListener('resize', handleResize.bind(this));
 
   // Setup audio components.
   var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
@@ -148,7 +149,7 @@ function Waveform({
   }
 
   //---------------------------------------------------------
-  //handleMouseMove():
+  //handleMouseMove(): Handles mouse movements
   //---------------------------------------------------------
   function handleMouseMove() {
     if (!mouseDown)
@@ -160,7 +161,7 @@ function Waveform({
   }
 
   //---------------------------------------------------------
-  //handleMouseUp():
+  //handleMouseUp(): Handles when mouse is released
   //---------------------------------------------------------
   function handleMouseUp() {
     mouseDown = false;
@@ -168,7 +169,7 @@ function Waveform({
   }
 
   //---------------------------------------------------------
-  //handleMouseDown():
+  //handleMouseDown(): Handles when the mouse is pressed down
   //---------------------------------------------------------
   function handleMouseDown() {
     mouseDown = true;
@@ -176,6 +177,17 @@ function Waveform({
     playbackTime = (x / WIDTH * this.duration);
     pastTime = audioCtx.currentTime;
     this.setPlaybackTime(playbackTime);
+  }
+
+  //---------------------------------------------------------
+  //handleResize(): Handles the resizing of the window
+  //---------------------------------------------------------
+  function resize() {
+    this.canvas.width = container.offsetWidth;
+    this.canvas.height = container.offsetHeight;
+    WIDTH = this.canvas.width;
+    HEIGHT = this.canvas.height;
+    this.processChannelData();
   }
 
   //---------------------------------------------------------
@@ -213,10 +225,11 @@ function Waveform({
 //==============================================================================
 function FrequencyChart({
   container,
-  barSize = 5,
-  amplitude = 0.33,
+  barWidth = -1,
+  amplitude = 0.5,
   fftSize = 8,
   spacing = 2,
+  hertzCeiling = 1,
   bottomAmplitude = amplitude,
   mainColor = "#42cef4",
   bottomColor = mainColor
@@ -235,8 +248,8 @@ function FrequencyChart({
   this.canvas.height = container.offsetHeight;
   var canvasCtx = this.canvas.getContext("2d");
   container.appendChild(this.canvas);
-  const WIDTH = this.canvas.width;
-  const HEIGHT = this.canvas.height;
+  var WIDTH = this.canvas.width;
+  var HEIGHT = this.canvas.height;
 
   // Timing variables
   var playing = false;
@@ -246,8 +259,13 @@ function FrequencyChart({
 
   // Process arguments.
   var bufferLength = analyser.frequencyBinCount;
-  var dataArray = new Uint8Array(bufferLength);
-  var barWidth = (WIDTH / bufferLength);
+  hertzCeiling = Math.floor(bufferLength * hertzCeiling);
+  var dataArray = new Uint8Array(hertzCeiling + 1);
+
+  if(barWidth <= 0) {
+    window.addEventListener('resize', handleResize.bind(this));
+    barWidth = (WIDTH / dataArray.length);
+  }
 
   //---------------------------------------------------------
   //generate(): Loads audio and launches animation
@@ -321,7 +339,7 @@ function FrequencyChart({
       this.play();
     }
   }
-  
+
   //---------------------------------------------------------
   //setPlayback(): Handles progression of playback during render
   //---------------------------------------------------------
@@ -330,6 +348,17 @@ function FrequencyChart({
       playbackTime = playbackTime + audioCtx.currentTime - pastTime;
       pastTime = audioCtx.currentTime;
     }
+  }
+
+  //---------------------------------------------------------
+  //handleResize(): Handles the resizing of the window
+  //---------------------------------------------------------
+  function handleResize() {
+    this.canvas.width = container.offsetWidth;
+    this.canvas.height = container.offsetHeight
+    WIDTH = this.canvas.width;
+    HEIGHT = this.canvas.height;
+    barWidth = (WIDTH / dataArray.length);
   }
 
   //---------------------------------------------------------
