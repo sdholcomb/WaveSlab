@@ -182,7 +182,7 @@ function Waveform({
   //---------------------------------------------------------
   //handleResize(): Handles the resizing of the window
   //---------------------------------------------------------
-  function resize() {
+  function handleResize() {
     this.canvas.width = container.offsetWidth;
     this.canvas.height = container.offsetHeight;
     WIDTH = this.canvas.width;
