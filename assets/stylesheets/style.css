@@ -1,0 +1,112 @@
+.theme
+{
+  --color-background: #1d2025;
+
+  /* Dark text */
+  --color-50: #f0f4f8;
+  --color-100: #d9e2ec;
+  --color-200: #bcccdc;
+  --color-300: #9fb3c8;
+  --color-400: #829ab1;
+
+  /* Light text */
+  --color-500: #627d98;
+  --color-600: #486581;
+  --color-700: #334e68;
+  --color-800: #243b53;
+  --color-900: #102a43;
+
+  /* Accent Colors */
+  --color-accent-1: #22dcc9;
+  --color-accent-2: #baeca2;
+  --color-accent-bkg: #2e3636;
+
+  --color-text: #a8b2be;
+  --color-text-accent-base: black;
+  --color-text-accent: #a0a0a0;
+}
+
+body
+{
+  background-color: var(--color-background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.flex-box
+{
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
+
+.flex-item
+{
+  height: 100%;
+  width: 100%;
+}
+
+.flex-item-thirds
+{
+  flex: 33%;
+}
+
+.card
+{
+  background-color: var(--color-900);
+  padding: 10px;
+  margin: 10px;
+  border-radius: 15px;
+  height: 90%;
+  min-width: 400px;
+}
+
+.btn-square
+{
+  background-color: var(--color-accent-2);
+  border: none;
+  color: var(--color-text-accent-base);
+  padding: 10px;
+  min-width: 50px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.waveslab-table
+{
+  width: 100%;
+}
+
+.waveslab-table tr
+{
+  height: 2em;
+  text-align: center;
+}
+
+.waveslab-table tr:nth-child(even)
+{
+  background-color: var(--color-700);
+  color: var(--color-text);
+}
+
+.waveslab-table tr:nth-child(odd)
+{
+  color: var(--color-text);
+}
+
+.list-box
+{
+  color: var(--color-text);
+}
+
+.list-box > .list-item
+{
+  border-bottom: 1px solid var(--color-text);
+  padding-bottom: 5px;
+  padding-top: 5px;
+}

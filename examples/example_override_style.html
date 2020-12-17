@@ -1,17 +1,16 @@
 <html>
 <head>
+  <link rel="stylesheet" href="../assets/stylesheets/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
-
-    body{
-      background-color: #000000;
-    }
-
-		#holder{
+		#holder
+    {
       width: 100%;
       height: 75%;
     }
 
-    #load{
+    #load
+    {
       background-color: #4CAF50;
       border: none;
       color: white;
@@ -22,22 +21,71 @@
       font-size: 16px;
     }
 
-    p{
+    p
+    {
       color: white;
     }
 	</style>
 
   <script src="../src/waveslab.js"></script>
 </head>
-<body>
-  <p>Audio provided by bensound: https://www.bensound.com/<p>
-  <div>
-    <div id="holder"></div>
-    <button type="button" onclick="wave.playPause()">play/pause</button>
+<body class="theme">
+  <div class="flex-box" style="height: 50%; margin-top: 10%">
+    <div class="flex-item flex-item-thirds">
+      <div class="card">
+        <table class="waveslab-table">
+          <tr onClick="selectSong('../assets/audios/dubstep.mp3');">
+            <td>1:23</td>
+            <td>Dubstep</td>
+            <td class="material-icons">favorite</td>
+          </tr>
+          <tr onClick="selectSong('../assets/audios/betterdays.mp3');">
+            <td>2:34</td>
+            <td>Better Days</td>
+            <td class="material-icons">favorite</td>
+          </tr>
+          <tr onClick="selectSong('../assets/audios/slowmotion.mp3');">
+            <td>0:01</td>
+            <td>Slow Motion</td>
+            <td class="material-icons">favorite</td>
+          </tr>
+          <tr onClick="selectSong('../assets/audios/veloma.mp3');">
+            <td>0:01</td>
+            <td>Veloma</td>
+            <td class="material-icons">favorite</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="flex-item flex-item-thirds">
+      <div class="card">
+        <div id="holder"></div>
+        <button id="btn" class="material-icons btn-square" type="button" onclick="wave.playPause();toggleIcon();">play_arrow</button>
+      </div>
+    </div>
+    <div class="flex-item flex-item-thirds">
+      <div class="card">
+        <table class="waveslab-table">
+          <tr>
+            <td>Theme 1</td>
+          </tr>
+          <tr>
+            <td>Theme 2</td>
+          </tr>
+          <tr>
+            <td>Theme 3</td>
+          </tr>
+          <tr>
+            <td>Theme 4</td>
+          </tr>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script>
     var wave = new FrequencyChart({container: "holder"});
+    var isPlay = true;
 
     //overriding setBarStyle for advanced users
     wave.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight){
@@ -50,5 +98,31 @@
       ctx.fillRect(currentX, ctxHeight/2, barWidth, barHeight/5);
     }
     wave.generate("../assets/audios/slowmotion.mp3");
+
+    function toggleIcon()
+    {
+      if(isPlay)
+      {
+        document.getElementById("btn").textContent = "pause";
+        isPlay = false;
+      }
+      else
+      {
+        document.getElementById("btn").textContent = "play_arrow";
+        isPlay = true;
+      }
+    }
+
+    function selectSong(song)
+    {
+      if(!isPlay)
+      {
+        toggleIcon();
+      }
+
+      wave.stop();
+      wave.resetPlayback();
+      wave.generate(song);
+    }
   </script>
 </body>

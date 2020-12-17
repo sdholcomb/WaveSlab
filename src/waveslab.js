@@ -61,6 +61,7 @@ function Waveform({
     document.addEventListener('audioLoaded', () => {
       this.processChannelData();
       this.render();
+      document.removeEventListener('audioLoaded');
     }, false);
     this.loadAudio(url);
   }
@@ -176,7 +177,6 @@ function Waveform({
     var x = event.clientX - this.canvas.offsetLeft;
     playbackTime = (x / WIDTH * this.duration);
     pastTime = audioCtx.currentTime;
-    this.setPlaybackTime(playbackTime);
   }
 
   //---------------------------------------------------------
@@ -251,11 +251,15 @@ function FrequencyChart({
   var WIDTH = this.canvas.width;
   var HEIGHT = this.canvas.height;
 
+  // Event handlers
+  window.addEventListener('resize', handleResize.bind(this));
+
   // Timing variables
   var playing = false;
   var playbackTime = 0;
   var pastTime = 0;
   var source;
+  var rendering = false;
 
   // Process arguments.
   var bufferLength = analyser.frequencyBinCount;
@@ -263,7 +267,6 @@ function FrequencyChart({
   var dataArray = new Uint8Array(hertzCeiling + 1);
 
   if(barWidth <= 0) {
-    window.addEventListener('resize', handleResize.bind(this));
     barWidth = (WIDTH / dataArray.length);
   }
 
@@ -273,7 +276,11 @@ function FrequencyChart({
   //---------------------------------------------------------
   this.generate = function(url) {
     document.addEventListener('audioLoaded', () => {
-      this.render();
+      if(!rendering)
+      {
+        this.render();
+        rendering = true;
+      }
     }, false);
     this.loadAudio(url);
   }
@@ -341,6 +348,26 @@ function FrequencyChart({
   }
 
   //---------------------------------------------------------
+  //stop(): stops playback
+  //---------------------------------------------------------
+  this.stop = function()
+  {
+    if(playing)
+    {
+      source.stop();
+      playing = false;
+    }
+  }
+
+  //---------------------------------------------------------
+  //resetPlayback(): Resets playback
+  //---------------------------------------------------------
+  this.resetPlayback = function()
+  {
+    playbackTime = 0;
+  }
+
+  //---------------------------------------------------------
   //setPlayback(): Handles progression of playback during render
   //---------------------------------------------------------
   function syncTime() {
@@ -354,8 +381,11 @@ function FrequencyChart({
   //handleResize(): Handles the resizing of the window
   //---------------------------------------------------------
   function handleResize() {
-    this.canvas.width = container.offsetWidth;
-    this.canvas.height = container.offsetHeight
+    this.canvas.style.width ='100%';
+    this.canvas.style.height='100%';
+    this.canvas.width = this.canvas.offsetWidth;
+    this.canvas.height = this.canvas.offsetHeight;
+
     WIDTH = this.canvas.width;
     HEIGHT = this.canvas.height;
     barWidth = (WIDTH / dataArray.length);
@@ -400,6 +430,7 @@ function FrequencyChart({
   //render(): render loop drawing on canvas
   //---------------------------------------------------------
   this.render = function() {
+
     this.draw();
     syncTime();
     requestAnimationFrame(() => {
