@@ -1,9 +1,10 @@
 <html>
+
 <head>
   <link rel="stylesheet" href="../assets/stylesheets/style.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
-		#holder
+    #holder
     {
       width: 100%;
       height: 75%;
@@ -25,83 +26,89 @@
     {
       color: white;
     }
-	</style>
+  </style>
 
   <script src="../src/waveslab.js"></script>
 </head>
+
 <body class="theme">
-  <div class="flex-box" style="height: 50%; margin-top: 10%">
-    <div class="flex-item flex-item-thirds">
-      <div class="card">
+  <div class="flex-box" style="height: 40%; margin-top: 5%">
+    <div class="flex-item" style="flex: 30%">
+      <div class="card card-solid">
         <table class="waveslab-table">
-          <tr onClick="selectSong('../assets/audios/dubstep.mp3');">
-            <td>1:23</td>
+          <tr>
+            <td></td>
+            <td>Title</td>
+            <td>Artist</td>
+            <td class="material-icons">schedule</td>
+          </tr>
+          <tr onClick="selectSong(this, '../assets/audios/dubstep.mp3');">
+            <td class="material-icons">favorite</td>
             <td>Dubstep</td>
-            <td class="material-icons">favorite</td>
+            <td>BenSound</td>
+            <td>1:23</td>
           </tr>
-          <tr onClick="selectSong('../assets/audios/betterdays.mp3');">
-            <td>2:34</td>
+          <tr onClick="selectSong(this, '../assets/audios/betterdays.mp3');">
+            <td class="material-icons">favorite</td>
             <td>Better Days</td>
-            <td class="material-icons">favorite</td>
+            <td>BenSound</td>
+            <td>2:34</td>
           </tr>
-          <tr onClick="selectSong('../assets/audios/slowmotion.mp3');">
-            <td>0:01</td>
+          <tr onClick="selectSong(this, '../assets/audios/slowmotion.mp3');" class="selected">
+            <td class="material-icons">favorite</td>
             <td>Slow Motion</td>
-            <td class="material-icons">favorite</td>
+            <td>BenSound</td>
+            <td>3:26</td>
           </tr>
-          <tr onClick="selectSong('../assets/audios/veloma.mp3');">
-            <td>0:01</td>
+          <tr onClick="selectSong(this, '../assets/audios/veloma.mp3');">
+            <td class="material-icons">favorite</td>
             <td>Veloma</td>
-            <td class="material-icons">favorite</td>
+            <td>Fabrizio Paterlin</td>
+            <td>2:54</td>
           </tr>
         </table>
       </div>
     </div>
-    <div class="flex-item flex-item-thirds">
-      <div class="card">
+    <div class="flex-item" style="flex: 65%;">
+      <div class="card card-solid">
         <div id="holder"></div>
-        <button id="btn" class="material-icons btn-square" type="button" onclick="wave.playPause();toggleIcon();">play_arrow</button>
+        <button id="btn" class="material-icons btn-square" type="button" onclick="wave.playPause();toggleIcon();" disabled>play_arrow</button>
       </div>
     </div>
-    <div class="flex-item flex-item-thirds">
-      <div class="card">
-        <table class="waveslab-table">
-          <tr>
-            <td>Theme 1</td>
-          </tr>
-          <tr>
-            <td>Theme 2</td>
-          </tr>
-          <tr>
-            <td>Theme 3</td>
-          </tr>
-          <tr>
-            <td>Theme 4</td>
-          </tr>
-        </table>
+    <div class="flex-item" style="flex: 90%;">
+      <div class="card card-outline" style="align-items: center; display: flex; justify-content: center;">
+        <svg class="progress-ring" style="vertical-align: middle;" width="120" height="120">
+          <circle class="progress-ring__circle" stroke-width="4" fill="transparent" r="52" cx="60" cy="60" />
+          <text id="progress-ring-text" x="50%" y="50%" text-anchor="middle" fill="white" font-size="20px" font-family="Arial" dy=".3em">00:00</text>
+        </svg>
       </div>
     </div>
   </div>
 
   <script>
-    var wave = new FrequencyChart({container: "holder"});
     var isPlay = true;
 
+    var wave = new FrequencyChart(
+    {
+      container: "holder"
+    });
+
     //overriding setBarStyle for advanced users
-    wave.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight){
+    wave.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight)
+    {
       //top bars
-      ctx.fillStyle = 'rgb(50,'+ (currentX) +',' + (barHeight + 100) +')';
-      ctx.fillRect(currentX,ctxHeight/2-barHeight * amplitude,barWidth,barHeight * amplitude);
+      ctx.fillStyle = 'rgb(50,' + (currentX) + ',' + (barHeight + 100) + ')';
+      ctx.fillRect(currentX, ctxHeight / 2 - barHeight * amplitude, barWidth, barHeight * amplitude);
 
       //bottom reflected bars
-      ctx.fillStyle = 'rgba(50,'+ (currentX) +',' + (barHeight + 100) + ', 0.3)';
-      ctx.fillRect(currentX, ctxHeight/2, barWidth, barHeight/5);
+      ctx.fillStyle = 'rgba(50,' + (currentX) + ',' + (barHeight + 100) + ', 0.3)';
+      ctx.fillRect(currentX, ctxHeight / 2, barWidth, barHeight / 5);
     }
     wave.generate("../assets/audios/slowmotion.mp3");
 
     function toggleIcon()
     {
-      if(isPlay)
+      if (isPlay)
       {
         document.getElementById("btn").textContent = "pause";
         isPlay = false;
@@ -113,16 +120,53 @@
       }
     }
 
-    function selectSong(song)
+    function selectSong(ele, song)
     {
-      if(!isPlay)
+      // Set the selected song row.
+      var elems = document.querySelectorAll('.waveslab-table tr');
+      for (let i = 0; i < elems.length; i++)
+      {
+        elems[i].classList.remove('selected');
+      }
+      ele.classList.add('selected');
+
+      // Toggle the play icon if necessary.
+      if (!isPlay)
       {
         toggleIcon();
       }
+      document.getElementById("btn").disabled = true;
 
+      // Generate the new frequency data.
       wave.stop();
-      wave.resetPlayback();
+      wave.setPlaybackTime(0);
       wave.generate(song);
     }
+
+    document.addEventListener("audioLoaded", function(event)
+    {
+      document.getElementById("btn").disabled = false;
+    });
+
+    // Progress circle related logic.
+    var circle = document.querySelector('circle');
+    var radius = circle.r.baseVal.value;
+    var circumference = radius * 2 * Math.PI;
+
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = `${circumference}`;
+
+    function setProgress(percent)
+    {
+      const offset = circumference - percent / 100 * circumference;
+      circle.style.strokeDashoffset = offset;
+    }
+
+    document.addEventListener("progress", function(event)
+    {
+      setProgress(event.detail.timeSeconds / wave.duration * 100);
+      var timestamp = parseFloat(event.detail.timeSeconds);
+      document.getElementById("progress-ring-text").textContent = timestamp.toFixed(2);
+    });
   </script>
 </body>

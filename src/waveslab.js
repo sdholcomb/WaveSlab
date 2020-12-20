@@ -6,7 +6,8 @@
 //==============================================================================
 //Waveform:
 //==============================================================================
-function Waveform({
+function Waveform(
+{
   container,
   barSize = 5,
   spacing = 1,
@@ -15,7 +16,8 @@ function Waveform({
   mainColor = "#ffffff",
   progressionColor = "#869aba",
   cursorColor = "#ffffff"
-}) {
+})
+{
 
   // Canvas setup.
   var container = document.getElementById(container);
@@ -57,8 +59,10 @@ function Waveform({
   //generate(): Loads audio and launches animation
   //            once audio is ready
   //---------------------------------------------------------
-  this.generate = function(url) {
-    document.addEventListener('audioLoaded', () => {
+  this.generate = function(url)
+  {
+    document.addEventListener('audioLoaded', () =>
+    {
       this.processChannelData();
       this.render();
       document.removeEventListener('audioLoaded');
@@ -69,8 +73,10 @@ function Waveform({
   //---------------------------------------------------------
   //processChannelData(): Stores the channel data into a canvas usable form
   //---------------------------------------------------------
-  this.processChannelData = function() {
-    for (var i = 0; i < WIDTH; i += spacing) {
+  this.processChannelData = function()
+  {
+    for (var i = 0; i < WIDTH; i += spacing)
+    {
       var loc = Math.floor(this.chanData.length / (WIDTH - spacing)) * i;
       var val = this.chanData[loc];
       waveData[i] = val;
@@ -80,7 +86,8 @@ function Waveform({
   //---------------------------------------------------------
   //loadAudio(): loads the audio and stores results
   //---------------------------------------------------------
-  this.loadAudio = function(url) {
+  this.loadAudio = function(url)
+  {
     var readyEvent = new Event('audioLoaded');
     var self = this;
     var request = new XMLHttpRequest();
@@ -88,9 +95,11 @@ function Waveform({
     request.responseType = 'arraybuffer';
 
     // Decode asynchronously
-    request.onload = function() {
+    request.onload = function()
+    {
       audioCtx.decodeAudioData(request.response,
-        function(buffer) {
+        function(buffer)
+        {
           self.audBuffer = buffer;
           self.duration = buffer.duration;
           self.chanData = buffer.getChannelData(0);
@@ -103,11 +112,14 @@ function Waveform({
   //---------------------------------------------------------
   //playPause(): alternates between playing and pausing playback
   //---------------------------------------------------------
-  this.playPause = function() {
-    if (!playing) {
+  this.playPause = function()
+  {
+    if (!playing)
+    {
       this.play();
     }
-    else {
+    else
+    {
       source.stop();
       playing = false;
     }
@@ -116,7 +128,8 @@ function Waveform({
   //---------------------------------------------------------
   //play(): plays from playbackTime or specified time in seconds if provided
   //---------------------------------------------------------
-  this.play = function(seconds = playbackTime) {
+  this.play = function(seconds = playbackTime)
+  {
     if (playing)
       source.stop();
 
@@ -132,9 +145,11 @@ function Waveform({
   //---------------------------------------------------------
   //setPlaybackTime(seconds): Sets the time in seconds for the playback
   //---------------------------------------------------------
-  this.setPlaybackTime = function(seconds) {
+  this.setPlaybackTime = function(seconds)
+  {
     playbackTime = seconds;
-    if (playing) {
+    if (playing)
+    {
       this.play();
     }
   }
@@ -142,8 +157,10 @@ function Waveform({
   //---------------------------------------------------------
   //syncTime(): Handles progression of playback during render
   //---------------------------------------------------------
-  function syncTime() {
-    if (playing) {
+  function syncTime()
+  {
+    if (playing)
+    {
       playbackTime = playbackTime + audioCtx.currentTime - pastTime;
       pastTime = audioCtx.currentTime;
     }
@@ -152,7 +169,8 @@ function Waveform({
   //---------------------------------------------------------
   //handleMouseMove(): Handles mouse movements
   //---------------------------------------------------------
-  function handleMouseMove() {
+  function handleMouseMove()
+  {
     if (!mouseDown)
       return;
 
@@ -164,7 +182,8 @@ function Waveform({
   //---------------------------------------------------------
   //handleMouseUp(): Handles when mouse is released
   //---------------------------------------------------------
-  function handleMouseUp() {
+  function handleMouseUp()
+  {
     mouseDown = false;
     this.setPlaybackTime(playbackTime);
   }
@@ -172,7 +191,8 @@ function Waveform({
   //---------------------------------------------------------
   //handleMouseDown(): Handles when the mouse is pressed down
   //---------------------------------------------------------
-  function handleMouseDown() {
+  function handleMouseDown()
+  {
     mouseDown = true;
     var x = event.clientX - this.canvas.offsetLeft;
     playbackTime = (x / WIDTH * this.duration);
@@ -182,7 +202,8 @@ function Waveform({
   //---------------------------------------------------------
   //handleResize(): Handles the resizing of the window
   //---------------------------------------------------------
-  function handleResize() {
+  function handleResize()
+  {
     this.canvas.width = container.offsetWidth;
     this.canvas.height = container.offsetHeight;
     WIDTH = this.canvas.width;
@@ -193,9 +214,11 @@ function Waveform({
   //---------------------------------------------------------
   //draw(): draws this waveform
   //---------------------------------------------------------
-  this.draw = function() {
+  this.draw = function()
+  {
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-    for (var i = 0; i < WIDTH; i += spacing) {
+    for (var i = 0; i < WIDTH; i += spacing)
+    {
 
       //set color based on progression
       canvasCtx.fillStyle = (i / WIDTH * this.duration <= playbackTime) ? progressionColor : mainColor;
@@ -211,10 +234,12 @@ function Waveform({
   //---------------------------------------------------------
   //render(): render loop for animating and timing audio waveform
   //---------------------------------------------------------
-  this.render = function() {
+  this.render = function()
+  {
     this.draw();
     syncTime();
-    requestAnimationFrame(() => {
+    requestAnimationFrame(() =>
+    {
       this.render();
     });
   }
@@ -223,7 +248,8 @@ function Waveform({
 //==============================================================================
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
 //==============================================================================
-function FrequencyChart({
+function FrequencyChart(
+{
   container,
   barWidth = -1,
   amplitude = 0.5,
@@ -233,8 +259,8 @@ function FrequencyChart({
   bottomAmplitude = amplitude,
   mainColor = "#42cef4",
   bottomColor = mainColor
-}) {
-
+})
+{
   // Audio context
   var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
   var analyser = audioCtx.createAnalyser();
@@ -266,7 +292,8 @@ function FrequencyChart({
   hertzCeiling = Math.floor(bufferLength * hertzCeiling);
   var dataArray = new Uint8Array(hertzCeiling + 1);
 
-  if(barWidth <= 0) {
+  if (barWidth <= 0)
+  {
     barWidth = (WIDTH / dataArray.length);
   }
 
@@ -274,12 +301,13 @@ function FrequencyChart({
   //generate(): Loads audio and launches animation
   //               once audio is ready
   //---------------------------------------------------------
-  this.generate = function(url) {
-    document.addEventListener('audioLoaded', () => {
-      if(!rendering)
+  this.generate = function(url)
+  {
+    document.addEventListener('audioLoaded', () =>
+    {
+      if (!rendering)
       {
-        this.render();
-        rendering = true;
+        this.startRenderLoop();
       }
     }, false);
     this.loadAudio(url);
@@ -288,7 +316,8 @@ function FrequencyChart({
   //---------------------------------------------------------
   //loadAudio(): loads the audio and stores results
   //---------------------------------------------------------
-  this.loadAudio = function(url) {
+  this.loadAudio = function(url)
+  {
     var readyEvent = new Event('audioLoaded');
     var self = this;
     var request = new XMLHttpRequest();
@@ -296,9 +325,11 @@ function FrequencyChart({
     request.responseType = 'arraybuffer';
 
     // Decode asynchronously
-    request.onload = function() {
+    request.onload = function()
+    {
       audioCtx.decodeAudioData(request.response,
-        function(buffer) {
+        function(buffer)
+        {
           self.audBuffer = buffer;
           self.duration = buffer.duration;
           document.dispatchEvent(readyEvent);
@@ -310,20 +341,23 @@ function FrequencyChart({
   //---------------------------------------------------------
   //playPause(): alternates between playing and pausing playback
   //---------------------------------------------------------
-  this.playPause = function() {
-    if (!playing) {
+  this.playPause = function()
+  {
+    if (!playing)
+    {
       this.play();
     }
-    else {
-      source.stop();
-      playing = false;
+    else
+    {
+      this.stop();
     }
   }
 
   //---------------------------------------------------------
   //play(): plays from playbackTime or specified time in seconds if provided
   //---------------------------------------------------------
-  this.play = function(seconds = playbackTime) {
+  this.play = function(seconds = playbackTime)
+  {
     if (playing)
       source.stop();
 
@@ -340,11 +374,29 @@ function FrequencyChart({
   //---------------------------------------------------------
   //setPlaybackTime(seconds): Sets the time in seconds for the playback
   //---------------------------------------------------------
-  this.setPlaybackTime = function(seconds) {
+  this.setPlaybackTime = function(seconds)
+  {
     playbackTime = seconds;
-    if (playing) {
+    if (playing)
+    {
       this.play();
     }
+
+    document.dispatchEvent(new CustomEvent("progress",
+    {
+      detail:
+      {
+        timeSeconds: playbackTime
+      }
+    }));
+  }
+
+  //---------------------------------------------------------
+  //getPlaybackTime(): Gets the current playback time.
+  //---------------------------------------------------------
+  this.getPlaybackTime = function()
+  {
+    return playbackTime;
   }
 
   //---------------------------------------------------------
@@ -352,7 +404,7 @@ function FrequencyChart({
   //---------------------------------------------------------
   this.stop = function()
   {
-    if(playing)
+    if (playing)
     {
       source.stop();
       playing = false;
@@ -360,29 +412,29 @@ function FrequencyChart({
   }
 
   //---------------------------------------------------------
-  //resetPlayback(): Resets playback
-  //---------------------------------------------------------
-  this.resetPlayback = function()
-  {
-    playbackTime = 0;
-  }
-
-  //---------------------------------------------------------
   //setPlayback(): Handles progression of playback during render
   //---------------------------------------------------------
-  function syncTime() {
-    if (playing) {
-      playbackTime = playbackTime + audioCtx.currentTime - pastTime;
+  this.syncTime = function()
+  {
+    if (playing)
+    {
+      this.setPlaybackTime(playbackTime + audioCtx.currentTime - pastTime);
       pastTime = audioCtx.currentTime;
+    }
+
+    if (playbackTime >= this.duration)
+    {
+      this.clear();
     }
   }
 
   //---------------------------------------------------------
   //handleResize(): Handles the resizing of the window
   //---------------------------------------------------------
-  function handleResize() {
-    this.canvas.style.width ='100%';
-    this.canvas.style.height='100%';
+  function handleResize()
+  {
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
     this.canvas.width = this.canvas.offsetWidth;
     this.canvas.height = this.canvas.offsetHeight;
 
@@ -396,7 +448,8 @@ function FrequencyChart({
   //               through the object so it can be overriden with custom styles
   //               without having to override the whole draw function
   //---------------------------------------------------------
-  this.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight) {
+  this.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight)
+  {
     //top bar
     ctx.fillStyle = mainColor;
     ctx.fillRect(currentX, ctxHeight / 2 - barHeight * amplitude, barWidth, barHeight * amplitude);
@@ -409,14 +462,16 @@ function FrequencyChart({
   //---------------------------------------------------------
   //draw():
   //---------------------------------------------------------
-  this.draw = function() {
+  this.draw = function()
+  {
     analyser.getByteFrequencyData(dataArray);
 
     //clear canvas
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
     var x = 0;
-    for (var i = 0; i < bufferLength; i++) {
+    for (var i = 0; i < bufferLength; i++)
+    {
       //get barHeight data
       barHeight = dataArray[i];
 
@@ -429,12 +484,48 @@ function FrequencyChart({
   //---------------------------------------------------------
   //render(): render loop drawing on canvas
   //---------------------------------------------------------
-  this.render = function() {
+  this.render = function()
+  {
+    if (!rendering)
+    {
+      return;
+    }
 
     this.draw();
-    syncTime();
-    requestAnimationFrame(() => {
+    this.syncTime();
+    requestAnimationFrame(() =>
+    {
       this.render();
     });
+  }
+
+  //---------------------------------------------------------
+  //stopRenderLoop(): Sets the flag to stop rendering.
+  //---------------------------------------------------------
+  this.stopRenderLoop = function()
+  {
+    rendering = false;
+  }
+
+  //---------------------------------------------------------
+  //startRenderLoop(): Starts the render loop.
+  //---------------------------------------------------------
+  this.startRenderLoop = function()
+  {
+    if(!rendering)
+    {
+      rendering = true;
+      this.render();
+    }
+  }
+
+  //---------------------------------------------------------
+  //clear(): Stops audio, stops display render loop, clears the canvas
+  //---------------------------------------------------------
+  this.clear = function()
+  {
+    this.stop();
+    this.stopRenderLoop();
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
   }
 }

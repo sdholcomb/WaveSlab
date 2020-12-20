@@ -54,12 +54,33 @@ body
 
 .card
 {
-  background-color: var(--color-900);
   padding: 10px;
   margin: 10px;
   border-radius: 15px;
   height: 90%;
   min-width: 400px;
+}
+
+.card-solid
+{
+  background-color: var(--color-900);
+}
+
+.card-outline
+{
+  background-color: var(--color-background);
+  border: 2px solid var(--color-accent-1);
+}
+
+.btn
+{
+  background-color: var(--color-accent-2);
+  border: none;
+  color: var(--color-text-accent-base);
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .btn-square
@@ -77,6 +98,12 @@ body
   cursor: pointer;
 }
 
+.btn-square:disabled
+{
+  background-color: var(--color-800);
+  color: var(--color-700);
+}
+
 .waveslab-table
 {
   width: 100%;
@@ -90,23 +117,30 @@ body
 
 .waveslab-table tr:nth-child(even)
 {
-  background-color: var(--color-700);
+  background-color: var(--color-800);
   color: var(--color-text);
 }
 
 .waveslab-table tr:nth-child(odd)
 {
+  background-color: var(--color-800);
   color: var(--color-text);
 }
 
-.list-box
+.waveslab-table .selected
 {
-  color: var(--color-text);
+  background-color: var(--color-600) !important;
 }
 
-.list-box > .list-item
+.progress-ring
 {
-  border-bottom: 1px solid var(--color-text);
-  padding-bottom: 5px;
-  padding-top: 5px;
+}
+
+.progress-ring__circle
+{
+  margin: auto;
+  transition: 0.35s stroke-dashoffset;
+  stroke: var(--color-accent-2);
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
 }
