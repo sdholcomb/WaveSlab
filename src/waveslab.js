@@ -65,7 +65,6 @@ function Waveform(
     {
       this.processChannelData();
       this.render();
-      document.removeEventListener('audioLoaded');
     }, false);
     this.loadAudio(url);
   }
