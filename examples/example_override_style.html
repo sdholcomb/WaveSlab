@@ -46,7 +46,7 @@
             <td class="material-icons">favorite</td>
             <td>Dubstep</td>
             <td>BenSound</td>
-            <td>1:23</td>
+            <td>2:04</td>
           </tr>
           <tr onClick="selectSong(this, '../assets/audios/betterdays.mp3');">
             <td class="material-icons">favorite</td>
@@ -72,7 +72,7 @@
     <div class="flex-item" style="flex: 65%;">
       <div class="card card-solid">
         <div id="holder"></div>
-        <button id="btn" class="material-icons btn-square" type="button" onclick="wave.playPause();toggleIcon();" disabled>play_arrow</button>
+        <button id="btn" class="material-icons btn-square" type="button" onclick="wave.playPause()" disabled>play_arrow</button>
       </div>
     </div>
     <div class="flex-item" style="flex: 90%;">
@@ -88,9 +88,11 @@
   <script>
     var isPlay = true;
 
+    // Create the chart.
     var wave = new FrequencyChart(
     {
-      container: "holder"
+      container: "holder",
+      fftSize: 13
     });
 
     //overriding setBarStyle for advanced users
@@ -104,22 +106,11 @@
       ctx.fillStyle = 'rgba(50,' + (currentX) + ',' + (barHeight + 100) + ', 0.3)';
       ctx.fillRect(currentX, ctxHeight / 2, barWidth, barHeight / 5);
     }
+
+    // Kick everything off with the provided audio file.
     wave.generate("../assets/audios/slowmotion.mp3");
 
-    function toggleIcon()
-    {
-      if (isPlay)
-      {
-        document.getElementById("btn").textContent = "pause";
-        isPlay = false;
-      }
-      else
-      {
-        document.getElementById("btn").textContent = "play_arrow";
-        isPlay = true;
-      }
-    }
-
+    // Function to select a song from the table.
     function selectSong(ele, song)
     {
       // Set the selected song row.
@@ -129,30 +120,33 @@
         elems[i].classList.remove('selected');
       }
       ele.classList.add('selected');
-
-      // Toggle the play icon if necessary.
-      if (!isPlay)
-      {
-        toggleIcon();
-      }
       document.getElementById("btn").disabled = true;
 
       // Generate the new frequency data.
       wave.stop();
-      wave.setPlaybackTime(0);
       wave.generate(song);
     }
 
-    document.addEventListener("audioLoaded", function(event)
+    // This event is used to indicate the audio has completed the loading process.
+    document.addEventListener("WaveSlab:AudioLoadComplete", function(event)
     {
       document.getElementById("btn").disabled = false;
     });
 
-    // Progress circle related logic.
+    document.addEventListener("WaveSlab:PlayEvent", function(event)
+    {
+      document.getElementById("btn").textContent = "pause";
+    });
+
+    document.addEventListener("WaveSlab:StopEvent", function(event)
+    {
+      document.getElementById("btn").textContent = "play_arrow";
+    });
+
+    // Progress ring related logic.
     var circle = document.querySelector('circle');
     var radius = circle.r.baseVal.value;
     var circumference = radius * 2 * Math.PI;
-
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
     circle.style.strokeDashoffset = `${circumference}`;
 
@@ -162,7 +156,7 @@
       circle.style.strokeDashoffset = offset;
     }
 
-    document.addEventListener("progress", function(event)
+    document.addEventListener("WaveSlab:PlaybackTimeStatus", function(event)
     {
       setProgress(event.detail.timeSeconds / wave.duration * 100);
       var timestamp = parseFloat(event.detail.timeSeconds);

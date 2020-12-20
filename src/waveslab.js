@@ -253,7 +253,7 @@ function FrequencyChart(
   container,
   barWidth = -1,
   amplitude = 0.5,
-  fftSize = 8,
+  fftSize = 8, // A value between 5 and 15.
   spacing = 2,
   hertzCeiling = 1,
   bottomAmplitude = amplitude,
@@ -277,15 +277,21 @@ function FrequencyChart(
   var WIDTH = this.canvas.width;
   var HEIGHT = this.canvas.height;
 
-  // Event handlers
-  window.addEventListener('resize', handleResize.bind(this));
-
   // Timing variables
   var playing = false;
   var playbackTime = 0;
   var pastTime = 0;
   var source;
   var rendering = false;
+
+  // Event handlers
+  window.addEventListener('resize', handleResize.bind(this));
+
+  // Events
+  var audioLoadCompleteEvent = new Event('WaveSlab:AudioLoadComplete');
+  var playEvent = new Event('WaveSlab:PlayEvent');
+  var stopEvent = new Event('WaveSlab:StopEvent');
+  var playbackCompleteEvent = new Event('WaveSlab:PlaybackComplete');
 
   // Process arguments.
   var bufferLength = analyser.frequencyBinCount;
@@ -303,13 +309,14 @@ function FrequencyChart(
   //---------------------------------------------------------
   this.generate = function(url)
   {
-    document.addEventListener('audioLoaded', () =>
+    document.addEventListener('WaveSlab:AudioLoadComplete', () =>
     {
       if (!rendering)
       {
         this.startRenderLoop();
       }
     }, false);
+    setPlayback(0);
     this.loadAudio(url);
   }
 
@@ -318,7 +325,6 @@ function FrequencyChart(
   //---------------------------------------------------------
   this.loadAudio = function(url)
   {
-    var readyEvent = new Event('audioLoaded');
     var self = this;
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
@@ -332,7 +338,7 @@ function FrequencyChart(
         {
           self.audBuffer = buffer;
           self.duration = buffer.duration;
-          document.dispatchEvent(readyEvent);
+          document.dispatchEvent(audioLoadCompleteEvent);
         });
     }
     request.send();
@@ -359,9 +365,15 @@ function FrequencyChart(
   this.play = function(seconds = playbackTime)
   {
     if (playing)
-      source.stop();
+    {
+        source.stop();
+    }
+    else
+    {
+        document.dispatchEvent(playEvent);
+    }
 
-    playbackTime = seconds;
+    setPlayback(seconds);
     source = audioCtx.createBufferSource();
     source.buffer = this.audBuffer;
     source.connect(analyser);
@@ -372,17 +384,12 @@ function FrequencyChart(
   }
 
   //---------------------------------------------------------
-  //setPlaybackTime(seconds): Sets the time in seconds for the playback
+  //setPlayback(): Gateway function for playback time.
   //---------------------------------------------------------
-  this.setPlaybackTime = function(seconds)
+  function setPlayback(seconds)
   {
     playbackTime = seconds;
-    if (playing)
-    {
-      this.play();
-    }
-
-    document.dispatchEvent(new CustomEvent("progress",
+    document.dispatchEvent(bob = new CustomEvent("WaveSlab:PlaybackTimeStatus",
     {
       detail:
       {
@@ -408,23 +415,7 @@ function FrequencyChart(
     {
       source.stop();
       playing = false;
-    }
-  }
-
-  //---------------------------------------------------------
-  //setPlayback(): Handles progression of playback during render
-  //---------------------------------------------------------
-  this.syncTime = function()
-  {
-    if (playing)
-    {
-      this.setPlaybackTime(playbackTime + audioCtx.currentTime - pastTime);
-      pastTime = audioCtx.currentTime;
-    }
-
-    if (playbackTime >= this.duration)
-    {
-      this.clear();
+      document.dispatchEvent(stopEvent);
     }
   }
 
@@ -482,6 +473,24 @@ function FrequencyChart(
   }
 
   //---------------------------------------------------------
+  //syncTime(): Handles progression of playback during render
+  //---------------------------------------------------------
+  this.syncTime = function()
+  {
+    if (playing)
+    {
+      setPlayback(playbackTime + audioCtx.currentTime - pastTime);
+      pastTime = audioCtx.currentTime;
+    }
+
+    if (playbackTime >= this.duration)
+    {
+      this.clear();
+      document.dispatchEvent(playbackCompleteEvent);
+    }
+  }
+
+  //---------------------------------------------------------
   //render(): render loop drawing on canvas
   //---------------------------------------------------------
   this.render = function()
@@ -520,12 +529,12 @@ function FrequencyChart(
   }
 
   //---------------------------------------------------------
-  //clear(): Stops audio, stops display render loop, clears the canvas
+  //clear(): Stops audio, clears the canvas
   //---------------------------------------------------------
   this.clear = function()
   {
     this.stop();
-    this.stopRenderLoop();
+    setPlayback(0);
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
   }
 }
