@@ -86,16 +86,14 @@
   </div>
 
   <script>
-    var isPlay = true;
-
     // Create the chart.
     var wave = new FrequencyChart(
     {
       container: "holder",
-      fftSize: 10
+      fftSize: 8
     });
 
-    //overriding setBarStyle for advanced users
+    // Overriding the function to draw the bars with custom styling.
     wave.drawBars = function(currentX, barWidth, barHeight, amplitude, ctx, ctxHeight)
     {
       //top bars

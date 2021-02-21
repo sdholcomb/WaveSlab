@@ -246,10 +246,27 @@ function Waveform(
 
 //==============================================================================
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
+//
 //==============================================================================
+
+/**
+ * Represents a FrequencyChart.
+
+ * @constructor
+ * @param container - The ID of the parent element for the canvas.
+ * @param barWidth - The width in pixels of the bars. (Default )
+ * @param amplitude - The max amplitude of the graphic. Float value between 0 and 1.
+ * @param fftSize - An unsigned integer, representing the window size of the FFT, given in number of samples. A
+ * higher value will result in more details in the frequency domain but fewer details in the time domain.
+ * @param spacing - The size in pixels between individual bars.
+ * @param hertzCeiling
+ * @param bottomAmplitude - The amplitude of the bottom half. (Default equal to amplitude).
+ * @param mainColor - The color of the top bars.
+ * @param bottomColotr - The color of the bottom bars. (Default equal to mainColor).
+ */
 function FrequencyChart(
 {
-  container,
+  container, //
   barWidth = -1,
   amplitude = 0.5,
   fftSize = 8, // A value between 5 and 15.
@@ -285,6 +302,7 @@ function FrequencyChart(
 
   // Event handlers
   window.addEventListener('resize', handleResize.bind(this));
+  document.addEventListener('WaveSlab:AudioLoadComplete', handleAudioLoadComplete.bind(this));
 
   // Events
   var audioLoadCompleteEvent = new Event('WaveSlab:AudioLoadComplete');
@@ -308,15 +326,19 @@ function FrequencyChart(
   //---------------------------------------------------------
   this.generate = function(url)
   {
-    document.addEventListener('WaveSlab:AudioLoadComplete', () =>
-    {
-      if (!rendering)
-      {
-        this.startRenderLoop();
-      }
-    }, false);
     setPlayback(0);
     this.loadAudio(url);
+  }
+
+  //---------------------------------------------------------
+  //handleAudioLoadComplete(): Handles the the actions to complete when audio has loaded.
+  //---------------------------------------------------------
+  function handleAudioLoadComplete()
+  {
+    if (!rendering)
+    {
+      this.startRenderLoop();
+    }
   }
 
   //---------------------------------------------------------
@@ -365,11 +387,11 @@ function FrequencyChart(
   {
     if (playing)
     {
-        source.stop();
+      source.stop();
     }
     else
     {
-        document.dispatchEvent(playEvent);
+      document.dispatchEvent(playEvent);
     }
 
     setPlayback(seconds);
@@ -520,7 +542,7 @@ function FrequencyChart(
   //---------------------------------------------------------
   this.startRenderLoop = function()
   {
-    if(!rendering)
+    if (!rendering)
     {
       rendering = true;
       this.render();
