@@ -126,17 +126,17 @@
     }
 
     // This event is used to indicate the audio has completed the loading process.
-    document.addEventListener("WaveSlab:AudioLoadComplete", function(event)
+    wave.getContainer().addEventListener("WaveSlab:AudioLoadComplete", function(event)
     {
       document.getElementById("btn").disabled = false;
     });
 
-    document.addEventListener("WaveSlab:PlayEvent", function(event)
+    wave.getContainer().addEventListener("WaveSlab:PlayEvent", function(event)
     {
       document.getElementById("btn").textContent = "pause";
     });
 
-    document.addEventListener("WaveSlab:StopEvent", function(event)
+    wave.getContainer().addEventListener("WaveSlab:StopEvent", function(event)
     {
       document.getElementById("btn").textContent = "play_arrow";
     });
@@ -154,7 +154,7 @@
       circle.style.strokeDashoffset = offset;
     }
 
-    document.addEventListener("WaveSlab:PlaybackTimeStatus", function(event)
+    wave.getContainer().addEventListener("WaveSlab:PlaybackTimeStatus", function(event)
     {
       setProgress(event.detail.timeSeconds / wave.duration * 100);
       var timestamp = parseFloat(event.detail.timeSeconds);

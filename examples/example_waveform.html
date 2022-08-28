@@ -1,38 +1,50 @@
 <html>
 <head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/stylesheets/style.css">
   <style>
-
-    body{
-      background-color: #37474f;
-    }
-
 		#waveholder{
       width: 100%;
       height: 50%;
     }
 
-    button{
-      background-color: #869aba;
-      border: none;
-      border-radius: 50px;
-      margin: auto;
-      display: block;
-    }
-
     p{
       color: white;
     }
+
+    canvas
+    {
+      border: 2px solid black;
+    }
 	</style>
 
-  <script src="../src/waveslab.js"></script>
+  <script src="../src/waveform.js"></script>
 </head>
-<body>
+<body class="theme">
   <p>Audio provided by bensound: https://www.bensound.com/<p>
-  <div id="waveholder"></div>
-  <button type="button" onclick="wave.playPause()">play/pause</button>
+  <div class="card card-solid" style="text-align: center; height: 80%;">
+    <div id="waveholder"></div>
+    <button id="btn" class="material-icons btn-square" type="button" onclick="wave.playPause()" disabled>play_arrow</button>
+  </div>
 
   <script>
     var wave = new Waveform({container: "waveholder", mainColor: "#ffffff"});
     wave.generate("../assets/audios/betterdays.mp3");
+
+    wave.getContainer().addEventListener("WaveSlab:AudioLoadComplete", function(event)
+    {
+      document.getElementById("btn").disabled = false;
+    });
+
+    wave.getContainer().addEventListener("WaveSlab:PlayEvent", function(event)
+    {
+      document.getElementById("btn").textContent = "pause";
+    });
+
+    wave.getContainer().addEventListener("WaveSlab:StopEvent", function(event)
+    {
+      document.getElementById("btn").textContent = "play_arrow";
+    });
   </script>
 </body>
+</html>

@@ -61,7 +61,7 @@ function Waveform(
   //---------------------------------------------------------
   this.generate = function(url)
   {
-    document.addEventListener('audioLoaded', () =>
+    container.addEventListener('audioLoaded', () =>
     {
       this.processChannelData();
       this.render();
@@ -102,7 +102,7 @@ function Waveform(
           self.audBuffer = buffer;
           self.duration = buffer.duration;
           self.chanData = buffer.getChannelData(0);
-          document.dispatchEvent(readyEvent);
+          container.dispatchEvent(readyEvent);
         });
     }
     request.send();
@@ -248,25 +248,24 @@ function Waveform(
 //FrequencyChart: uses analyser node to create bar chart of current playing audio
 //
 //==============================================================================
-
 /**
  * Represents a FrequencyChart.
 
  * @constructor
  * @param container - The ID of the parent element for the canvas.
- * @param barWidth - The width in pixels of the bars. (Default )
+ * @param barWidth - The width in pixels of the bars. (Default based on data size)
  * @param amplitude - The max amplitude of the graphic. Float value between 0 and 1.
  * @param fftSize - An unsigned integer, representing the window size of the FFT, given in number of samples. A
  * higher value will result in more details in the frequency domain but fewer details in the time domain.
  * @param spacing - The size in pixels between individual bars.
- * @param hertzCeiling
+ * @param hertzCeiling - The hertz ceiling.
  * @param bottomAmplitude - The amplitude of the bottom half. (Default equal to amplitude).
  * @param mainColor - The color of the top bars.
  * @param bottomColotr - The color of the bottom bars. (Default equal to mainColor).
  */
 function FrequencyChart(
 {
-  container, //
+  container,
   barWidth = -1,
   amplitude = 0.5,
   fftSize = 8, // A value between 5 and 15.
@@ -284,7 +283,7 @@ function FrequencyChart(
   analyser.fftSize = fftSize;
 
   // Setup canvas. Keeping accessible for user manipulation.
-  var container = document.getElementById(container);
+  container = document.getElementById(container);
   this.canvas = document.createElement('canvas');
   this.canvas.width = container.offsetWidth;
   this.canvas.height = container.offsetHeight;
@@ -302,7 +301,7 @@ function FrequencyChart(
 
   // Event handlers
   window.addEventListener('resize', handleResize.bind(this));
-  document.addEventListener('WaveSlab:AudioLoadComplete', handleAudioLoadComplete.bind(this));
+  container.addEventListener('WaveSlab:AudioLoadComplete', handleAudioLoadComplete.bind(this));
 
   // Events
   var audioLoadCompleteEvent = new Event('WaveSlab:AudioLoadComplete');
@@ -322,7 +321,7 @@ function FrequencyChart(
 
   //---------------------------------------------------------
   //generate(): Loads audio and launches animation
-  //               once audio is ready
+  //            once audio is ready
   //---------------------------------------------------------
   this.generate = function(url)
   {
@@ -359,7 +358,7 @@ function FrequencyChart(
         {
           self.audBuffer = buffer;
           self.duration = buffer.duration;
-          document.dispatchEvent(audioLoadCompleteEvent);
+          container.dispatchEvent(audioLoadCompleteEvent);
         });
     }
     request.send();
@@ -391,7 +390,7 @@ function FrequencyChart(
     }
     else
     {
-      document.dispatchEvent(playEvent);
+      container.dispatchEvent(playEvent);
     }
 
     setPlayback(seconds);
@@ -410,7 +409,7 @@ function FrequencyChart(
   function setPlayback(seconds)
   {
     playbackTime = seconds;
-    document.dispatchEvent(bob = new CustomEvent("WaveSlab:PlaybackTimeStatus",
+    container.dispatchEvent(bob = new CustomEvent("WaveSlab:PlaybackTimeStatus",
     {
       detail:
       {
@@ -428,6 +427,14 @@ function FrequencyChart(
   }
 
   //---------------------------------------------------------
+  //getContainer(): Returns the container.
+  //---------------------------------------------------------
+  this.getContainer = function()
+  {
+    return container;
+  }
+
+  //---------------------------------------------------------
   //stop(): stops playback
   //---------------------------------------------------------
   this.stop = function()
@@ -436,7 +443,7 @@ function FrequencyChart(
     {
       source.stop();
       playing = false;
-      document.dispatchEvent(stopEvent);
+      container.dispatchEvent(stopEvent);
     }
   }
 
@@ -507,12 +514,12 @@ function FrequencyChart(
     if (playbackTime >= this.duration)
     {
       this.clear();
-      document.dispatchEvent(playbackCompleteEvent);
+      container.dispatchEvent(playbackCompleteEvent);
     }
   }
 
   //---------------------------------------------------------
-  //render(): render loop drawing on canvas
+  //render(): render loop
   //---------------------------------------------------------
   this.render = function()
   {
